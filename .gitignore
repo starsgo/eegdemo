@@ -1,0 +1,6 @@
+BCICIV_2a_gdf/
+BCICIV_2b_gdf/
+EEGNet/*.mat
+eegnet_pytorch-main/
+eegnet/*.mat
+eegnet/
