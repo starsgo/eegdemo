@@ -45,14 +45,14 @@ class EEGNetDataset(Dataset):
 
     def parse_data_file(self, file_path):
         mat = loadmat(file_path)
-        source = {k: v for k, v in mat.items() if not k.startswith('__')}
-        data = source['data']
+        data = mat['train_data']
+        print(f"dataset train_data size {data.shape}")
         return np.array(data, dtype=np.float32)
 
     def parse_target_file(self, target_path):
         mat = loadmat(target_path)
-        source = {k: v for k, v in mat.items() if not k.startswith('__')}
-        target = source['label'].squeeze()
+        target = mat['train_labels']
+        print(f"dataset train_labels size {target.shape}")
         return np.array(target, dtype=np.float32)
 
     def __len__(self):
@@ -70,13 +70,6 @@ class EEGNetDataset(Dataset):
                 std = 1e-6
             item[channel_idx, :] = (channel_data - mean) / std
 
-        # mean = np.mean(item)
-        # std = np.std(item)
-        # # 避免标准差为0的情况
-        # if std < 1e-6:
-        #     std = 1e-6
-        # item = (item - mean) / std
-
         item = np.expand_dims(item, axis=0)
         target = self.target[index]
         if self.transform:
@@ -85,7 +78,9 @@ class EEGNetDataset(Dataset):
             target = self.target_transform(target)
         return item, target
 #
-# dataSet = EEGNetDataset(file_path='./bciciv.mat', target_path='./bciciv.mat')
+train_data_path = "/home/gxx/Documents/pythonProjects/datasets/dataset_SEED-IV/SEED-IV_train_data"
+train_labels_path = "/home/gxx/Documents/pythonProjects/datasets/dataset_SEED-IV/SEED-IV_train_labels"
+dataSet = EEGNetDataset(file_path=train_data_path, target_path=train_labels_path)
 # len = len(dataSet)
 # print(len)
 # print(dataSet.__getitem__(4))

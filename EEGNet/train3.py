@@ -19,7 +19,7 @@ def reset_model():   # 每折重新初始化权重
     net = EEGNet(ch_nums=22, T=1248, class_dim=4).to(device)
     return net
 
-full_set = EEGNetDataset('./bciciv_2a_1T.mat', './bciciv_2a_1T.mat')
+full_set = EEGNetDataset('./bciciv_all5_exclude9.mat', './bciciv_all5_exclude9.mat')
 kfold   = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 X_idx   = np.arange(len(full_set))
 y_all   = full_set.target
@@ -51,7 +51,6 @@ for fold, (train_idx, val_idx) in enumerate(kfold.split(X_idx, y_all)):
     optimizer = optim.Adam(net.parameters(), lr=0.005)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max',
                                                      patience=5, factor=0.5)
-
     best_val_acc = 0.0
     for epoch in range(Config.train_number_epochs):
         # ---------- 训练 ----------
@@ -99,6 +98,8 @@ for fold, (train_idx, val_idx) in enumerate(kfold.split(X_idx, y_all)):
         # ---------- 早停 ----------
         if val_acc > best_val_acc:
             best_val_acc = val_acc
+            best_model_wts = copy.deepcopy(net.state_dict())
+            torch.save(best_model_wts, f"best_model_exclude9_fold{fold} .pt")
             patience = 0
         else:
             patience += 1
@@ -126,6 +127,7 @@ for fold, (train_idx, val_idx) in enumerate(kfold.split(X_idx, y_all)):
     plt.show()
 
 # -------------- 结果汇总 --------------
+torch.save(net.state_dict(), 'eegnet_.pth')
 print('\n===== 5-Fold CV Summary =====')
 print('Val-Acc each fold:', val_acc_list)
 print(f'Mean ± Std: {np.mean(val_acc_list):.4f} ± {np.std(val_acc_list):.4f}')

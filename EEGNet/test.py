@@ -11,7 +11,7 @@ from dataset import EEGNetDataset
 # from train import net
 
 # 1. 测试集：这里用后 60% 当测试（与训练无交集）
-full_set = EEGNetDataset(file_path='./bciciv_2a_1E.mat', target_path='./bciciv_2a_1E.mat')
+full_set = EEGNetDataset(file_path='./bciciv_2a_9T.mat', target_path='./bciciv_2a_9T.mat')
 
 test_loader = DataLoader(full_set, batch_size=Config.test_batch_size,
                          shuffle=False, num_workers=0)
@@ -19,7 +19,7 @@ test_loader = DataLoader(full_set, batch_size=Config.test_batch_size,
 # 2. 加载模型权重
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 net = EEGNet(ch_nums=22, T=1248, class_dim=4).to(device)
-net.load_state_dict(torch.load('eegnet_01at_22_1250.pth', map_location=device))
+net.load_state_dict(torch.load('best_model_exclude9.pt', map_location=device))
 net.eval()  # 关键：推理模式
 
 # 3. 测试循环
