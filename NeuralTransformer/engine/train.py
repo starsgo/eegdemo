@@ -29,15 +29,16 @@ def train_one_epoch(device, net, in_chans, train_loader, val_loader ,criterion, 
     for i, (x, y) in enumerate(train_loader, 1):
 
         x, y = x.to(device), y.to(device)
-        out = net(x, in_chans)
+        # out = net(x, in_chans)
+        out = net(x)
         loss = criterion(out, y.long())
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        train_acc += (out.argmax(1) == y).float().mean().item()
-        train_loss += loss.item()
-        batches += 1
-        if i % 10 == 0 or i == len(train_loader):
+        train_acc += (out.argmax(1) == y).float().sum().item()
+        train_loss += loss.item() * y.size(0)
+        batches += y.size(0)
+        if i % 8 == 0 or i == len(train_loader):
             print(f"batch {i}/{len(train_loader)} "
                   f"train_loss={train_loss/batches} "
                   f"train_acc={train_acc/batches}")
@@ -49,11 +50,12 @@ def train_one_epoch(device, net, in_chans, train_loader, val_loader ,criterion, 
     with torch.no_grad():
         for i, (x, y) in enumerate(val_loader, 1):
             x, y = x.to(device), y.to(device)
-            out = net(x, in_chans)
+            # out = net(x, in_chans)
+            out = net(x)
             loss = criterion(out, y.long())
-            val_acc += (out.argmax(1) == y).float().mean().item()
-            val_loss += loss.item()
-            batches += 1
+            val_acc += (out.argmax(1) == y).float().sum().item()
+            val_loss += loss.item() * y.size(0)
+            batches += y.size(0)
             if i % 10 == 0 or i == len(val_loader):
                 print(f"batch {i}/{len(val_loader)}"
                       f"val_loss={val_loss / batches}"

@@ -39,8 +39,13 @@ class SEEDIVDataset(Dataset):
     def __getitem__(self, index):
         item = self.data[index, :]
         item = torch.from_numpy(item)  # 先转 Tensor
+        #(b t a n)
         item = torch.transpose(item, 0, 2)
         item = torch.transpose(item, 1, 2)
+        #(b n a t)
+
+        # for biot
+        item = torch.flatten(item, -2, -1)
 
         mean = item.mean(dim=-1, keepdim=True)  # (N, C, 1)
         std = item.std(dim=-1, keepdim=True)  # (N, C, 1)

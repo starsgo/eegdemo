@@ -8,6 +8,8 @@ import torch.nn.functional as F
 from timm.models.layers import drop_path, to_2tuple, trunc_normal_
 from timm.models.registry import register_model
 from einops import rearrange
+from torch.ao.nn.quantized import LayerNorm
+
 from .utils.util import Block
 
 
@@ -85,7 +87,8 @@ class NeuralTransformer(nn.Module):
         self.out_chans = 8
         self.patch_embed = nn.Sequential(
             TemporalConv(out_chans=self.out_chans),
-            nn.Linear(patch_size//8*self.out_chans, embed_dim)
+            # nn.Linear(patch_size//8*self.out_chans, embed_dim)
+            nn.LayerNorm(embed_dim)
         )
         self.time_window = EEG_size // patch_size       # a
         self.patch_size = patch_size

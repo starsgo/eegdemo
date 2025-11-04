@@ -6,6 +6,7 @@ from sklearn.model_selection import StratifiedKFold
 from torch import optim
 from torch.utils.data import Subset, DataLoader
 
+from NeuralTransformer.model.biot import BIOTClassifier
 from dataset.SEEDIV_dataset import SEEDIVDataset
 from model.NeuralTransfomer import NeuralTransformer
 from engine.train import train_one_epoch
@@ -13,12 +14,12 @@ from engine.train import train_one_epoch
 class Config():
     train_data_path = "/home/gxx/Documents/pythonProjects/datasets/dataset_SEED-IV/test/SEED-IV_train_data"
     train_label_path = "/home/gxx/Documents/pythonProjects/datasets/dataset_SEED-IV/test/SEED-IV_train_labels"
-    train_batch_size = 10 # 64
+    train_batch_size = 32 # 64
     test_batch_size = 10
     train_number_epochs = 80 # 100
     test_number_epochs = 40
 
-    b, n, a, t = 10, 62, 8, 200
+    b, n, a, t = 32, 62, 8, 200
     in_chans = np.arange(1, n+1)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -36,12 +37,14 @@ for fold, (train_idx, val_idx) in enumerate(kfold.split(X_idx, y_all)):
     train_loader = DataLoader(train_set, batch_size=Config.train_batch_size,
                               shuffle=True, drop_last=True)
     val_loader = DataLoader(val_set, batch_size=Config.test_batch_size,
-                            shuffle=False)
+                            shuffle=False, drop_last=True)
 
-    net = NeuralTransformer(EEG_size=Config.a*Config.t, patch_size=Config.t)
+    # net = NeuralTransformer(EEG_size=Config.a*Config.t, patch_size=Config.t)
+    net = BIOTClassifier(n_fft=200, hop_length=200, depth=4, heads=8, n_classes=4)
+
     net.to(device)
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = optim.AdamW(net.parameters(), lr=0.0005, weight_decay=0.01)
+    optimizer = optim.AdamW(net.parameters(), lr=0.001, weight_decay=0.001)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience=5, factor=0.5)
 
     best_val_acc = 0.0
