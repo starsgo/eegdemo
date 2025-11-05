@@ -70,7 +70,7 @@ class BIOTEncoder(nn.Module):
         heads=8,
         depth=4,
         n_channels=16,
-        n_fft=200,
+        n_fft=100,
         hop_length=100,
         **kwargs
     ):
@@ -121,10 +121,13 @@ class BIOTEncoder(nn.Module):
         x: [batch_size, channel, ts]
         output: [batch_size, emb_size]
         """
+        # print(f"biot encoder input x: {x.shape}")
         emb_seq = []
         for i in range(x.shape[1]):
             channel_spec_emb = self.stft(x[:, i : i + 1, :])
+            # (b ,1, t) -> (b, n_fft//2+1, (t-n_fft)//hop_length+1]) - (b, f, t)
             channel_spec_emb = self.patch_embedding(channel_spec_emb)
+            #(b, f, emb)
             batch_size, ts, _ = channel_spec_emb.shape
             # (batch_size, ts, emb)
             channel_token_emb = (
@@ -176,6 +179,8 @@ class UnsupervisedPretrain(nn.Module):
         )
 
     def forward(self, x, n_channel_offset=0):
+
+        # print(f"pretrain x: {x.shape}")
         emb = self.biot(x, n_channel_offset, perturb=True)
         emb = self.prediction(emb)
         pred_emb = self.biot(x, n_channel_offset)

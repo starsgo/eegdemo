@@ -4,3 +4,9 @@ EEGNet/*.mat
 eegnet_pytorch-main/
 eegnet/*.mat
 eegnet/
+*.pkl
+*.npz
+*.png
+*.txt
+biotLog/
+log-pretrain/
