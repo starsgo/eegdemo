@@ -22,15 +22,15 @@ class SEEDIVDataset2(Dataset):
         self.target_transform = target_transform
 
     def parse_data_file(self, file_path):
-        # mat = loadmat(file_path)
-        mat = dict(np.load(file_path, mmap_mode='r'))
+        mat = loadmat(file_path)
+        # mat = dict(np.load(file_path, mmap_mode='r'))
         source = {k: v for k, v in mat.items() if not k.startswith('__')}
         data = source['train_data']
         return np.array(data, dtype=np.float32)
 
     def parse_target_file(self, target_path):
-        # mat = loadmat(target_path)
-        mat = dict(np.load(target_path, mmap_mode='r'))
+        mat = loadmat(target_path)
+        # mat = dict(np.load(target_path, mmap_mode='r'))
         source = {k: v for k, v in mat.items() if not k.startswith('__')}
         target = source['train_labels'].squeeze()
         #(1, b) --> (b)
