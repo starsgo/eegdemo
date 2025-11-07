@@ -76,8 +76,8 @@ class NeuralTransformer(nn.Module):
                  embed_dim=200,
                  depth=3,
                  num_heads=10, mlp_ratio=4., qkv_bias=False, qk_norm=None, qk_scale=None, drop_rate=0.,
-                 attn_drop_rate=0.,
-                 drop_path_rate=0., norm_layer=nn.LayerNorm, init_values=None,
+                 attn_drop_rate=0.3,
+                 drop_path_rate=0.3, norm_layer=nn.LayerNorm, init_values=None,
 
                  use_abs_pos_emb=True, use_rel_pos_bias=False, use_shared_rel_pos_bias=False,
                  use_mean_pooling=True, init_scale=1, **kwargs):

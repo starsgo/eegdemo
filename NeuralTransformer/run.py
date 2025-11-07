@@ -6,14 +6,14 @@ from sklearn.model_selection import StratifiedKFold
 from torch import optim
 from torch.utils.data import Subset, DataLoader
 
-from NeuralTransformer.model.biot import BIOTClassifier
+from model.biot import BIOTClassifier
 from dataset.SEEDIV_dataset import SEEDIVDataset
 from model.NeuralTransfomer import NeuralTransformer
 from engine.train import train_one_epoch
 
 class Config():
-    train_data_path = "/home/gxx/Documents/pythonProjects/datasets/dataset_SEED-IV/test/SEED-IV_train_data"
-    train_label_path = "/home/gxx/Documents/pythonProjects/datasets/dataset_SEED-IV/test/SEED-IV_train_labels"
+    train_data_path = "/root/autodl-tmp/SEEDIV/testSEED-IV_train_data"
+    train_label_path = "/root/autodl-tmp/SEEDIV/testSEED-IV_train_labels"
     train_batch_size = 32 # 64
     test_batch_size = 10
     train_number_epochs = 80 # 100
@@ -50,6 +50,7 @@ for fold, (train_idx, val_idx) in enumerate(kfold.split(X_idx, y_all)):
     best_val_acc = 0.0
     patience = 0
     for epoch in range(Config.train_number_epochs):
+        print(f'\n--- Epoch {epoch + 1}/{Config.train_number_epochs} ---')
         val_acc = train_one_epoch(device=device, net=net, in_chans=Config.in_chans ,train_loader=train_loader, val_loader=val_loader,
                                   criterion=criterion, optimizer=optimizer, scheduler=scheduler)
         if val_acc > best_val_acc:
