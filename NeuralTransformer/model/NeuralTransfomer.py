@@ -76,8 +76,8 @@ class NeuralTransformer(nn.Module):
                  embed_dim=200,
                  depth=3,
                  num_heads=10, mlp_ratio=4., qkv_bias=False, qk_norm=None, qk_scale=None, drop_rate=0.,
-                 attn_drop_rate=0.,
-                 drop_path_rate=0., norm_layer=nn.LayerNorm, init_values=None,
+                 attn_drop_rate=0.3,
+                 drop_path_rate=0.3, norm_layer=nn.LayerNorm, init_values=None,
 
                  use_abs_pos_emb=True, use_rel_pos_bias=False, use_shared_rel_pos_bias=False,
                  use_mean_pooling=True, init_scale=1, **kwargs):
@@ -116,6 +116,7 @@ class NeuralTransformer(nn.Module):
         self.fc_norm = norm_layer(embed_dim) if use_mean_pooling else None
         # self.head = nn.Linear( EEG_size*in_chans, num_classes) if num_classes > 0 else nn.Identity()
         self.head = nn.Sequential(
+            nn.Linear(embed_dim, embed_dim),
             nn.ELU(),
             nn.Linear(embed_dim, num_classes)
         )
