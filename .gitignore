@@ -10,3 +10,8 @@ eegnet/
 *.txt
 biotLog/
 log-pretrain/
+
+NeuralTransformer/biotLog/
+NeuralTransformer/log-pretrain/
+NeuralTransformer/neuralTransformerLog/
+NeuralTransformer/log-neuralTransformer/

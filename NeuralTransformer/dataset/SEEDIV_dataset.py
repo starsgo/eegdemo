@@ -44,9 +44,6 @@ class SEEDIVDataset(Dataset):
         item = torch.transpose(item, 1, 2)
         #(b n a t)
 
-        # for biot
-        item = torch.flatten(item, -2, -1)
-
         mean = item.mean(dim=-1, keepdim=True)  # (N, C, 1)
         std = item.std(dim=-1, keepdim=True)  # (N, C, 1)
         item = (item - mean) / (std + 1e-8)

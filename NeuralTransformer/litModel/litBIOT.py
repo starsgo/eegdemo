@@ -14,7 +14,7 @@ from pytorch_lightning.strategies import DDPStrategy
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
-from NeuralTransformer.model import UnsupervisedPretrain
+from model import UnsupervisedPretrain
 
 class LitModel_supervised_pretrain(pl.LightningModule):
     def __init__(self, args, save_path):
