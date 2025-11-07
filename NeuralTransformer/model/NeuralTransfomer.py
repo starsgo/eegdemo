@@ -114,7 +114,11 @@ class NeuralTransformer(nn.Module):
             for i in range(depth)])
         self.norm = nn.Identity() if use_mean_pooling else norm_layer(embed_dim)
         self.fc_norm = norm_layer(embed_dim) if use_mean_pooling else None
-        self.head = nn.Linear( EEG_size*in_chans, num_classes) if num_classes > 0 else nn.Identity()
+        # self.head = nn.Linear( EEG_size*in_chans, num_classes) if num_classes > 0 else nn.Identity()
+        self.head = nn.Sequential(
+            nn.ELU(),
+            nn.Linear(embed_dim, num_classes)
+        )
 
         if self.pos_embed is not None:
             trunc_normal_(self.pos_embed, std=.02)
@@ -196,12 +200,13 @@ class NeuralTransformer(nn.Module):
         if self.fc_norm is not None:
             if return_all_tokens:
                 return self.fc_norm(x)
-                #(b, na+1, t)
+                #(b, na+1, emb)
             t = x[:, 1:, :]
             if return_patch_tokens:
                 return self.fc_norm(t)
             else:
                 return self.fc_norm(t.mean(1))
+                # (b, emb)
         else:
             if return_all_tokens:
                 return x
@@ -210,15 +215,15 @@ class NeuralTransformer(nn.Module):
             else:
                 return x[:, 0]
 
-    def forward(self, x, input_chans=None, return_patch_tokens=True, return_all_tokens=False, **kwargs):
+    def forward(self, x, input_chans=None, return_patch_tokens=False, return_all_tokens=False, **kwargs):
         '''
         x: [batch size, number of electrodes, number of patches, patch size]
         For example, for an EEG sample of 4 seconds with 64 electrodes, x will be [batch size, 64, 4, 200]
         '''
         x = self.forward_features(x, input_chans=input_chans, return_patch_tokens=return_patch_tokens,
-                                  return_all_tokens=return_all_tokens, **kwargs)
-        if return_patch_tokens:
-            x = x.view(x.shape[0], -1)
+                                  return_all_tokens=return_all_tokens ,use_mean_pooling=False, **kwargs)
+        # if return_patch_tokens:
+        #     x = x.view(x.shape[0], -1)
         x = self.head(x)
         return x
 
