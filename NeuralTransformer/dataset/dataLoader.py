@@ -11,8 +11,8 @@ class SEEDIV_trainSetLoader2(pl.LightningDataModule):
         super().__init__()
         self.data_file = data_file
         self.label_file = label_file
-        self.batch_size = batch_size
-        self.val_frac   = val_frac
+        self.batch_size = batch_size    # batch
+        self.val_frac   = val_frac      # 验证集系数
         self.train_ds = None
         self.val_ds = None
 

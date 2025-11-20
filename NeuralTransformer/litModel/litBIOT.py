@@ -48,7 +48,7 @@ class LitModel_supervised_pretrain(pl.LightningModule):
         labels = torch.arange(N).to(logits.device)
         contrastive_loss += F.cross_entropy(logits, labels, reduction="mean")
 
-        self.log("train_loss", contrastive_loss)
+        self.log("train_loss", contrastive_loss, on_step=True, on_epoch=True, prog_bar=True)
         return contrastive_loss
 
     def validation_step(self, batch, batch_idx):
@@ -67,7 +67,7 @@ class LitModel_supervised_pretrain(pl.LightningModule):
         labels = torch.arange(N).to(logits.device)
         contrastive_loss += F.cross_entropy(logits, labels, reduction="mean")
 
-        self.log("val_loss", contrastive_loss)
+        self.log("val_loss", contrastive_loss, on_step=False, on_epoch=True, prog_bar=True, sync_dist=True)
         return contrastive_loss
 
     def configure_optimizers(self):

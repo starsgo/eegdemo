@@ -2,37 +2,36 @@ import argparse
 import os
 
 import torch
+from pytorch_lightning.callbacks import BackboneFinetuning
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
 
 from dataset import SEEDIVDataset2, SEEDIV_trainSetLoader2
 from litModel.litBIOT import LitModel_supervised_pretrain
+from fineTune import BiotTuner
 
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.strategies import DDPStrategy
-from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
 def main(args):
-    train_data_path = "/home/gxx/Documents/pythonProjects/datasets/dataset_SEED-IV/SEED-IV_train_data"
-    train_label_path = "/home/gxx/Documents/pythonProjects/datasets/dataset_SEED-IV/SEED-IV_train_labels"
-    # train_data_path = "../file_mmap.npz"
-    # train_label_path = "../target_file_mmap.npz"
+    train_data_path = "/home/gxx/Documents/pythonProjects/datasets/dataset_SEED-IV/SEED-IV_test_data"
+    train_label_path = "/home/gxx/Documents/pythonProjects/datasets/dataset_SEED-IV/SEED-IV_test_labels"
 
-    # train_set = SEEDIVDataset2(train_data_path, train_label_path)
-    # train_loader = DataLoader(train_set,batch_size=args.batch_size,shuffle=True, drop_last=True)
 
-    dataModule = SEEDIV_trainSetLoader2(train_data_path, train_label_path, 64, 0.1)
+    dataModule = SEEDIV_trainSetLoader2(train_data_path, train_label_path, 32, 0.1)
     # define the trainer
-    log_dir = "log-pretrain"
+    log_dir = "log-finetune"
     os.makedirs(log_dir, exist_ok=True)
     N_version = (
             len(os.listdir(os.path.join(log_dir))) + 1
     )
     # define the model
     save_path = f"{log_dir}/{N_version}-unsupervised/checkpoints"
-    model = LitModel_supervised_pretrain(args, save_path)
+    backbone = LitModel_supervised_pretrain.load_from_checkpoint(
+        "log-pretrain/14-unsupervised/14-unsupervised/checkpoints/epoch=37_step=18000.ckpt",
+        args=args, save_path="log-finetune").model
+    model = BiotTuner(backbone, num_classes=4)
 
     logger = TensorBoardLogger(
         save_dir="./biotLog",
@@ -45,9 +44,17 @@ def main(args):
         benchmark=True,
         enable_checkpointing=True,
         logger=logger,
-        max_epochs=args.epochs,
+        max_epochs=10,
     )
-    # train the model
+    trainer.fit(model, dataModule)
+    trainer = pl.Trainer(
+        strategy=DDPStrategy(find_unused_parameters=False),
+        # strategy="ddp_notebook",
+        benchmark=True,
+        enable_checkpointing=True,
+        logger=logger,
+        max_epochs=10,
+        callbacks=[BackboneFinetuning(unfreeze_at_epoch=5)])
     trainer.fit(model, dataModule)
 
 if __name__ == "__main__":
@@ -59,5 +66,3 @@ if __name__ == "__main__":
     parser.add_argument("--num_workers", type=int, default=32, help="number of workers")
     args = parser.parse_args(["--batch_size", "64", "--lr", "2e-3"])
     main(args)
-
-

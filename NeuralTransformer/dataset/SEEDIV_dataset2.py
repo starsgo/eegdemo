@@ -11,6 +11,8 @@ import torchvision.transforms as transforms
 from torch import nn
 from scipy.io import savemat, loadmat
 
+
+# SEEDIVDataset2只能加载类似{'train_data': tensor:(b,t,c)}的mat文件
 class SEEDIVDataset2(Dataset):
     def __init__(self, file_path, target_path, transform=None, target_transform=None):
         self.file_path = file_path
@@ -23,16 +25,22 @@ class SEEDIVDataset2(Dataset):
 
     def parse_data_file(self, file_path):
         mat = loadmat(file_path)
-        # mat = dict(np.load(file_path, mmap_mode='r'))
         source = {k: v for k, v in mat.items() if not k.startswith('__')}
-        data = source['train_data']
+        # source {'train_data': tensor: (b, t, c)}
+        if 'train_data' in source.keys():
+            data = source['train_data']
+        else:
+            data = source['test_data']
         return np.array(data, dtype=np.float32)
 
     def parse_target_file(self, target_path):
         mat = loadmat(target_path)
-        # mat = dict(np.load(target_path, mmap_mode='r'))
         source = {k: v for k, v in mat.items() if not k.startswith('__')}
-        target = source['train_labels'].squeeze()
+        # source {'train_labels': tensor: (1, b)}
+        if 'train_labels' in source.keys():
+            target = source['train_labels'].squeeze()
+        else:
+            target = source['test_labels'].squeeze()
         #(1, b) --> (b)
         return np.array(target, dtype=np.float32)
 
@@ -42,16 +50,16 @@ class SEEDIVDataset2(Dataset):
     def __getitem__(self, index):
         item = self.data[index, :]
         item = torch.from_numpy(item)  # 先转 Tensor
-        #(b t n)
+        #(index t n)
 
         # for biot
         item = torch.transpose(item, -2, -1)
-        mean = item.mean(dim=-1, keepdim=True)  # (N, C, 1)
-        std = item.std(dim=-1, keepdim=True)  # (N, C, 1)
+        mean = item.mean(dim=-1, keepdim=True)  # (index, C, 1)
+        std = item.std(dim=-1, keepdim=True)  # (index, C, 1)
         item = (item - mean) / (std + 1e-8)
 
         target = self.target[index]
-        #(b)
+        #(index)
         if self.transform:
             item = self.transform(item)
         if self.target_transform:

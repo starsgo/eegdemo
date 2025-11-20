@@ -1,0 +1,9 @@
+# BIOT
+# 使用的数据是 SEEDIV
+# 数据源文件为
+#   训练文件 "/home/gxx/Documents/pythonProjects/datasets/dataset_SEED-IV/SEED-IV_train_data" (b,t,n)
+#   训练标签 "/home/gxx/Documents/pythonProjects/datasets/dataset_SEED-IV/SEED-IV_train_labels" (1,b)
+# 数据库类为 SEEDIVDataset2
+# 数据加载类为 SEEDIV_trainSetLoader2(pl.LightningDataModule)
+# 运行脚本 run_biot.run
+# log日志存在 .biotLog

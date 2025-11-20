@@ -17,11 +17,7 @@ from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 def main(args):
     train_data_path = "/home/gxx/Documents/pythonProjects/datasets/dataset_SEED-IV/SEED-IV_train_data"
     train_label_path = "/home/gxx/Documents/pythonProjects/datasets/dataset_SEED-IV/SEED-IV_train_labels"
-    # train_data_path = "../file_mmap.npz"
-    # train_label_path = "../target_file_mmap.npz"
 
-    # train_set = SEEDIVDataset2(train_data_path, train_label_path)
-    # train_loader = DataLoader(train_set,batch_size=args.batch_size,shuffle=True, drop_last=True)
 
     dataModule = SEEDIV_trainSetLoader2(train_data_path, train_label_path, 64, 0.1)
     # define the trainer
